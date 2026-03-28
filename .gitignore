@@ -1,0 +1,8 @@
+.venv/
+.locks/
+models*/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+logs/
