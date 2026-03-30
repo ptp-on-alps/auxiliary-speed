@@ -5,11 +5,10 @@ Shared utilities, model loaders, and benchmark primitives.
 import gc
 from contextlib import contextmanager
 from dataclasses import dataclass
-from pathlib import Path
 
 import torch
 from torch.amp import autocast
-from transformers import AutoModelForCausalLM, BitsAndBytesConfig
+from transformers import AutoModelForCausalLM
 
 # ---------------------------------------------------------------------------
 # Global CUDA optimizations (set at import time, before any model loading)
@@ -105,91 +104,26 @@ def try_compile(model, mode: str = "reduce-overhead", label: str = "") -> tuple:
 
 
 # ---------------------------------------------------------------------------
-# Quantized weight cache helpers
-# ---------------------------------------------------------------------------
-
-def quantized_save_path(model_name: str, bits: int) -> Path:
-    """Return the directory where pre-quantized weights for model_name are stored."""
-    slug = model_name.replace("/", "--")
-    return Path("quantized") / f"{slug}-int{bits}"
-
-
-def _quantized_source(model_name: str, bits: int) -> str:
-    """Return the pre-quantized path if it exists, otherwise the original model_name."""
-    p = quantized_save_path(model_name, bits)
-    if (p / "config.json").exists():
-        print(f"  Found pre-quantized INT{bits} weights at {p}")
-        return str(p)
-    return model_name
-
-
-# ---------------------------------------------------------------------------
 # Model loaders
 # ---------------------------------------------------------------------------
 
-def _multi_gpu_kwargs() -> dict:
-    n_gpus = torch.cuda.device_count()
-    return {"device_map": "auto", "max_memory": {i: "90GiB" for i in range(n_gpus)}}
-
-
-def load_model_int8(model_name: str, single_gpu: bool = False):
-    print("\n  Loading model in INT8 (bitsandbytes) ...")
-    source = _quantized_source(model_name, 8)
-    placement = {"device_map": {"": 0}} if single_gpu else _multi_gpu_kwargs()
-    kwargs = {} if source != model_name else {"quantization_config": BitsAndBytesConfig(load_in_8bit=True)}
-    model = AutoModelForCausalLM.from_pretrained(
-        source,
-        **kwargs,
-        torch_dtype=torch.bfloat16,
-        attn_implementation="flash_attention_2",
-        cache_dir=".",
-        **placement,
-    )
-    model.eval()
-    return model
-
-
-def load_model_int4(model_name: str, single_gpu: bool = False):
-    print("\n  Loading model in INT4 (bitsandbytes NF4) ...")
-    source = _quantized_source(model_name, 4)
-    placement = {"device_map": {"": 0}} if single_gpu else _multi_gpu_kwargs()
-    kwargs = {} if source != model_name else {
-        "quantization_config": BitsAndBytesConfig(
-            load_in_4bit=True,
-            bnb_4bit_compute_dtype=torch.bfloat16,
-            bnb_4bit_quant_type="nf4",
-            bnb_4bit_use_double_quant=True,
-        )
-    }
-    model = AutoModelForCausalLM.from_pretrained(
-        source,
-        **kwargs,
-        torch_dtype=torch.bfloat16,
-        attn_implementation="flash_attention_2",
-        cache_dir=".",
-        **placement,
-    )
-    model.eval()
-    return model
-
-
-def load_model_bf16_eval(model_name: str):
-    """BF16 model in eval mode — used as quality reference."""
+def load_model(model_name: str):
+    """Load a model as-is from HuggingFace (respects embedded quantization_config)."""
+    print(f"\n  Loading {model_name} ...")
     n_gpus = torch.cuda.device_count()
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
+        torch_dtype=torch.bfloat16,
         device_map="auto",
         max_memory={i: "90GiB" for i in range(n_gpus)},
-        torch_dtype=torch.bfloat16,
-        attn_implementation="flash_attention_2",
         cache_dir=".",
     )
     model.eval()
     return model
 
 
-def load_model_bf16(model_name: str):
-    print("\n  Loading model in BF16 for training ...")
+def load_model_for_training(model_name: str):
+    print(f"\n  Loading {model_name} in BF16 for training ...")
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
         device_map="auto",

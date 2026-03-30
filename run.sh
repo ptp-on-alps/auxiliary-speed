@@ -14,25 +14,25 @@ cd /capstor/scratch/cscs/fdraxler/inference-speed/
 pip install compressed-tensors
 
 MODEL=swiss-ai/Apertus-70B-2509
-# COMPRESSED_MODEL=RedHatAI/Apertus-70B-Instruct-2509-quantized.w4a16
+COMPRESSED_MODEL=RedHatAI/Apertus-70B-Instruct-2509-quantized.w4a16
 # MODEL=Qwen/Qwen2.5-72B
 
-echo "Quantize model"
-echo "====================="
-python quantize.py --model $MODEL --bits 4
-python quantize.py --model $MODEL --bits 8
-echo "====================="
-echo
-echo
-echo
+# echo "Quantize model"
+# echo "====================="
+# python quantize.py --model $MODEL --bits 4
+# python quantize.py --model $MODEL --bits 8
+# echo "====================="
+# echo
+# echo
+# echo
 echo "Quality check"
 echo "====================="
-python quality_check.py --model $MODEL
+python quality_check.py --model $MODEL --compressed-model $COMPRESSED_MODEL
 echo "====================="
 echo
 echo
 echo
-echo "Inference speed"
+echo "Inference speed (single GPU)"
 echo "====================="
-CUDA_VISIBLE_DEVICES=0 python inference_speed.py --model $MODEL --no-compile --skip-train --warmup 1 --repeats 2
+CUDA_VISIBLE_DEVICES=0 python inference_speed.py --models $MODEL $COMPRESSED_MODEL --no-compile --skip-train --warmup 1 --repeats 2
 echo "====================="
