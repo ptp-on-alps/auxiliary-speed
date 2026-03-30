@@ -5,6 +5,7 @@ Shared utilities, model loaders, and benchmark primitives.
 import gc
 from contextlib import contextmanager
 from dataclasses import dataclass
+from pathlib import Path
 
 import torch
 from torch.amp import autocast
@@ -104,6 +105,25 @@ def try_compile(model, mode: str = "reduce-overhead", label: str = "") -> tuple:
 
 
 # ---------------------------------------------------------------------------
+# Quantized weight cache helpers
+# ---------------------------------------------------------------------------
+
+def quantized_save_path(model_name: str, bits: int) -> Path:
+    """Return the directory where pre-quantized weights for model_name are stored."""
+    slug = model_name.replace("/", "--")
+    return Path("quantized") / f"{slug}-int{bits}"
+
+
+def _quantized_source(model_name: str, bits: int) -> str:
+    """Return the pre-quantized path if it exists, otherwise the original model_name."""
+    p = quantized_save_path(model_name, bits)
+    if (p / "config.json").exists():
+        print(f"  Found pre-quantized INT{bits} weights at {p}")
+        return str(p)
+    return model_name
+
+
+# ---------------------------------------------------------------------------
 # Model loaders
 # ---------------------------------------------------------------------------
 
@@ -114,11 +134,13 @@ def _multi_gpu_kwargs() -> dict:
 
 def load_model_int8(model_name: str, single_gpu: bool = False):
     print("\n  Loading model in INT8 (bitsandbytes) ...")
+    source = _quantized_source(model_name, 8)
     placement = {"device_map": {"": 0}} if single_gpu else _multi_gpu_kwargs()
+    kwargs = {} if source != model_name else {"quantization_config": BitsAndBytesConfig(load_in_8bit=True)}
     model = AutoModelForCausalLM.from_pretrained(
-        model_name,
-        quantization_config=BitsAndBytesConfig(load_in_8bit=True),
-        torch_dtype=torch.float16,
+        source,
+        **kwargs,
+        torch_dtype=torch.bfloat16,
         attn_implementation="flash_attention_2",
         cache_dir=".",
         **placement,
@@ -129,16 +151,19 @@ def load_model_int8(model_name: str, single_gpu: bool = False):
 
 def load_model_int4(model_name: str, single_gpu: bool = False):
     print("\n  Loading model in INT4 (bitsandbytes NF4) ...")
-    bnb_config = BitsAndBytesConfig(
-        load_in_4bit=True,
-        bnb_4bit_compute_dtype=torch.bfloat16,
-        bnb_4bit_quant_type="nf4",
-        bnb_4bit_use_double_quant=True,
-    )
+    source = _quantized_source(model_name, 4)
     placement = {"device_map": {"": 0}} if single_gpu else _multi_gpu_kwargs()
+    kwargs = {} if source != model_name else {
+        "quantization_config": BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_compute_dtype=torch.bfloat16,
+            bnb_4bit_quant_type="nf4",
+            bnb_4bit_use_double_quant=True,
+        )
+    }
     model = AutoModelForCausalLM.from_pretrained(
-        model_name,
-        quantization_config=bnb_config,
+        source,
+        **kwargs,
         torch_dtype=torch.bfloat16,
         attn_implementation="flash_attention_2",
         cache_dir=".",

@@ -26,7 +26,7 @@ def main():
         description="Logit vs Training compute ratio benchmark (fully optimized)")
     parser.add_argument("--model", type=str, default="meta-llama/Llama-2-70b-hf",
                         help="HuggingFace model name or local path")
-    parser.add_argument("--seq-lens", type=int, nargs="+", default=[512, 1024, 2048, 4096, 8192, 16384],
+    parser.add_argument("--seq-lens", type=int, nargs="+", default=[512, 1024, 2048, 4096, 8192],
                         help="Sequence lengths to benchmark")
     parser.add_argument("--batch-size", type=int, default=1,
                         help="Batch size (keep small for 70B)")

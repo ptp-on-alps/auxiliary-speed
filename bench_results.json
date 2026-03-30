@@ -1,0 +1,102 @@
+[
+  {
+    "label": "INT4 Inference (NF4)",
+    "seq_len": 512,
+    "tokens": 65536,
+    "wall_sec": 19.051896484375,
+    "n_gpus": 1,
+    "compiled": false,
+    "ms_per_token": 0.29070886969566345,
+    "tok_per_sec_per_gpu": 3439.867524671254
+  },
+  {
+    "label": "INT4 Inference (NF4)",
+    "seq_len": 1024,
+    "tokens": 65536,
+    "wall_sec": 19.196673828125,
+    "n_gpus": 1,
+    "compiled": false,
+    "ms_per_token": 0.29291799664497375,
+    "tok_per_sec_per_gpu": 3413.924755234595
+  },
+  {
+    "label": "INT4 Inference (NF4)",
+    "seq_len": 2048,
+    "tokens": 32768,
+    "wall_sec": 10.055443359375,
+    "n_gpus": 1,
+    "compiled": false,
+    "ms_per_token": 0.306867778301239,
+    "tok_per_sec_per_gpu": 3258.732492332065
+  },
+  {
+    "label": "INT4 Inference (NF4)",
+    "seq_len": 4096,
+    "tokens": 65536,
+    "wall_sec": 20.07903125,
+    "n_gpus": 1,
+    "compiled": false,
+    "ms_per_token": 0.3063817024230957,
+    "tok_per_sec_per_gpu": 3263.902485335292
+  },
+  {
+    "label": "INT4 Inference (NF4)",
+    "seq_len": 8192,
+    "tokens": 65536,
+    "wall_sec": 21.1538671875,
+    "n_gpus": 1,
+    "compiled": false,
+    "ms_per_token": 0.32278239727020264,
+    "tok_per_sec_per_gpu": 3098.0623740857072
+  },
+  {
+    "label": "INT8 Inference",
+    "seq_len": 512,
+    "tokens": 16384,
+    "wall_sec": 6.2814296875,
+    "n_gpus": 1,
+    "compiled": false,
+    "ms_per_token": 0.38338804244995117,
+    "tok_per_sec_per_gpu": 2608.3233937337613
+  },
+  {
+    "label": "INT8 Inference",
+    "seq_len": 1024,
+    "tokens": 16384,
+    "wall_sec": 6.31421337890625,
+    "n_gpus": 1,
+    "compiled": false,
+    "ms_per_token": 0.3853890001773834,
+    "tok_per_sec_per_gpu": 2594.7808565883533
+  },
+  {
+    "label": "INT8 Inference",
+    "seq_len": 2048,
+    "tokens": 16384,
+    "wall_sec": 6.31729638671875,
+    "n_gpus": 1,
+    "compiled": false,
+    "ms_per_token": 0.38557717204093933,
+    "tok_per_sec_per_gpu": 2593.514534864173
+  },
+  {
+    "label": "INT8 Inference",
+    "seq_len": 4096,
+    "tokens": 16384,
+    "wall_sec": 6.41279736328125,
+    "n_gpus": 1,
+    "compiled": false,
+    "ms_per_token": 0.3914060890674591,
+    "tok_per_sec_per_gpu": 2554.8912700426827
+  },
+  {
+    "label": "INT8 Inference",
+    "seq_len": 8192,
+    "tokens": 16384,
+    "wall_sec": 6.67666552734375,
+    "n_gpus": 1,
+    "compiled": false,
+    "ms_per_token": 0.40751132369041443,
+    "tok_per_sec_per_gpu": 2453.9195400609237
+  }
+]
