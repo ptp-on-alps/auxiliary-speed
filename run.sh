@@ -13,18 +13,18 @@ cd /capstor/scratch/cscs/fdraxler/inference-speed/
 
 pip install compressed-tensors
 
-MODEL=swiss-ai/Apertus-70B-2509
-COMPRESSED_MODEL=RedHatAI/Apertus-70B-Instruct-2509-quantized.w4a16
-# MODEL=Qwen/Qwen2.5-72B
+# We planned to run with Apertus-70B-2509, but the cluster was down when we submitted the job
+# MODEL=swiss-ai/Apertus-70B-2509
+MODEL=Qwen/Qwen2.5-72B
 
-# echo "Quantize model"
-# echo "====================="
-# python quantize.py --model $MODEL --bits 4
-# python quantize.py --model $MODEL --bits 8
-# echo "====================="
-# echo
-# echo
-# echo
+echo "Quantize model"
+echo "====================="
+python quantize.py --model $MODEL --bits 4
+python quantize.py --model $MODEL --bits 8
+echo "====================="
+echo
+echo
+echo
 echo "Quality check"
 echo "====================="
 python quality_check.py --model $MODEL --compressed-model $COMPRESSED_MODEL
