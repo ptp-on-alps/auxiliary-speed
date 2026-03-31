@@ -27,12 +27,12 @@ echo
 echo
 echo "Quality check"
 echo "====================="
-python quality_check.py --model $MODEL --compressed-model $COMPRESSED_MODEL
+python quality_check.py --model $MODEL
 echo "====================="
 echo
 echo
 echo
 echo "Inference speed (single GPU)"
 echo "====================="
-CUDA_VISIBLE_DEVICES=0 python inference_speed.py --models $MODEL $COMPRESSED_MODEL --no-compile --skip-train --warmup 1 --repeats 2
+CUDA_VISIBLE_DEVICES=0 python inference_speed.py --model $MODEL --no-compile --skip-train --warmup 1 --repeats 2
 echo "====================="
